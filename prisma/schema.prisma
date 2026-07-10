@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  COD
+  ONLINE
+  CARD
+}
+
+enum ReceiptStatus {
+  AWAITING_RECEIPT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  phone         String?
+  role          Role      @default(USER)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+  cart     Cart?
+  orders   Order[]
+  addresses Address[]
+  supportMessages SupportMessage[]
+  notifications Notification[]
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   @default("info")
+  title     String
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
+
+model SiteSetting {
+  id                    String   @id @default("default")
+  cardNumber            String   @default("6037991234567890")
+  cardHolder            String   @default("شمع‌های دست‌ساز شوکا")
+  bankName              String   @default("بانک ملی")
+  shebaNumber           String?
+  codEnabled            Boolean  @default(true)
+  onlineEnabled         Boolean  @default(true)
+  cardTransferEnabled   Boolean  @default(true)
+  shippingCost          Int      @default(45000)
+  freeShippingMin       Int      @default(500000)
+  globalDiscountPercent Int      @default(0)
+  globalDiscountActive  Boolean  @default(false)
+  promoBannerActive     Boolean  @default(false)
+  promoBannerText       String?
+  promoBannerLink       String?
+  promoBannerImageUrl   String?
+  siteTagline           String?
+  contactPhone          String?
+  contactEmail          String?
+  updatedAt             DateTime @updatedAt
+}
+
+model SupportMessage {
+  id          String   @id @default(cuid())
+  userId      String
+  content     String
+  isFromAdmin Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  image       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+model Product {
+  id          String         @id @default(cuid())
+  name        String
+  slug        String         @unique
+  description String
+  price       Int
+  comparePrice Int?
+  stock       Int            @default(0)
+  featured    Boolean        @default(false)
+  active      Boolean        @default(true)
+  scent       String?
+  burnTime    String?
+  weight      String?
+  categoryId  String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  category   Category       @relation(fields: [categoryId], references: [id])
+  images     ProductImage[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  url       String
+  alt       String?
+  order     Int     @default(0)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int     @default(1)
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+}
+
+model Address {
+  id         String  @id @default(cuid())
+  userId     String
+  title      String
+  fullName   String
+  phone      String
+  province   String
+  city       String
+  address    String
+  postalCode String
+  isDefault  Boolean @default(false)
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders     Order[]
+}
+
+model Order {
+  id              String         @id @default(cuid())
+  orderNumber     String         @unique
+  userId          String
+  addressId       String
+  status          OrderStatus    @default(PENDING)
+  paymentMethod   PaymentMethod  @default(COD)
+  receiptUrl      String?
+  receiptText     String?
+  receiptStatus   ReceiptStatus?
+  subtotal        Int
+  shippingCost    Int            @default(0)
+  discountAmount  Int            @default(0)
+  total           Int
+  notes           String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  user    User        @relation(fields: [userId], references: [id])
+  address Address     @relation(fields: [addressId], references: [id])
+  items   OrderItem[]
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  name      String
+  price     Int
+  quantity  Int
+  image     String?
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+}

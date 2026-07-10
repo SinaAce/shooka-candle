@@ -1,7 +1,20 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: [
+    "@libsql/client",
+    "@prisma/adapter-libsql",
+    "better-sqlite3",
+    "@prisma/adapter-better-sqlite3",
+  ],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.amazonaws.com",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

@@ -1,26 +1,346 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+html,
+html[data-theme="default"] {
+  --background: #faf6f0;
+  --foreground: #1c1917;
+  --primary: #c27803;
+  --primary-hover: #92400e;
+  --primary-light: #fef3c7;
+  --primary-text: #ffffff;
+  --surface: #fffcf7;
+  --surface-hover: #faf5eb;
+  --surface-alt: #f5efe4;
+  --border: #e8ddd0;
+  --text-secondary: #57534e;
+  --text-muted: #78716c;
+  --footer-bg: #1a1209;
+  --footer-text: #d6d3d1;
+  --wax: #faf5eb;
+  --wax-deep: #f0e4d0;
+  --glow: #fbbf24;
+  --glow-soft: rgba(251, 191, 36, 0.18);
+  --shadow-warm: 0 8px 32px -8px rgba(180, 83, 9, 0.14);
+}
+
+html[data-theme="dark"] {
+  --background: #0c0a09;
+  --foreground: #fafaf9;
+  --primary: #f59e0b;
+  --primary-hover: #d97706;
+  --primary-light: #292524;
+  --primary-text: #1c1917;
+  --surface: #1c1917;
+  --surface-hover: #292524;
+  --surface-alt: #141110;
+  --border: #44403c;
+  --text-secondary: #a8a29e;
+  --text-muted: #78716c;
+  --footer-bg: #0c0a09;
+  --footer-text: #a8a29e;
+  --wax: #1c1917;
+  --wax-deep: #0c0a09;
+  --glow: #fbbf24;
+  --glow-soft: rgba(251, 191, 36, 0.12);
+  --shadow-warm: 0 8px 32px -8px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="red"] {
+  --background: #fef7f7;
+  --foreground: #1c1917;
+  --primary: #dc2626;
+  --primary-hover: #b91c1c;
+  --primary-light: #fee2e2;
+  --primary-text: #ffffff;
+  --surface: #ffffff;
+  --surface-hover: #fef2f2;
+  --surface-alt: #fef2f2;
+  --border: #fecaca;
+  --text-secondary: #57534e;
+  --text-muted: #78716c;
+  --footer-bg: #7f1d1d;
+  --footer-text: #fecaca;
+}
+
+html[data-theme="blue"] {
+  --background: #f0f9ff;
+  --foreground: #0c4a6e;
+  --primary: #0284c7;
+  --primary-hover: #0369a1;
+  --primary-light: #e0f2fe;
+  --primary-text: #ffffff;
+  --surface: #ffffff;
+  --surface-hover: #f0f9ff;
+  --surface-alt: #e0f2fe;
+  --border: #bae6fd;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --footer-bg: #0c4a6e;
+  --footer-text: #bae6fd;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: var(--primary);
+  --font-sans: var(--font-vazirmatn);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  background-image:
+    radial-gradient(ellipse 90% 60% at 10% -5%, var(--glow-soft), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 95% 105%, color-mix(in srgb, var(--primary) 10%, transparent), transparent 50%);
+  background-attachment: fixed;
+}
+
+/* ── Candle-themed surfaces ── */
+.candle-card {
+  background: linear-gradient(160deg, var(--surface) 0%, var(--wax) 100%);
+  border: 1px solid color-mix(in srgb, var(--primary) 14%, var(--border));
+  box-shadow: var(--shadow-warm);
+  border-radius: 1rem;
+}
+
+.candle-glow {
+  box-shadow:
+    0 4px 20px -4px color-mix(in srgb, var(--primary) 45%, transparent),
+    0 0 40px -12px var(--glow-soft);
+}
+
+.candle-section {
+  position: relative;
+}
+
+.candle-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, var(--glow-soft), transparent 65%);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.wax-texture {
+  background-image:
+    linear-gradient(160deg, var(--surface-alt) 0%, var(--background) 100%);
+}
+
+.theme-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  border-radius: 1rem;
+}
+
+.theme-panel-muted {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.theme-alert-success {
+  background: color-mix(in srgb, #10b981 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, #10b981 35%, var(--border));
+  color: color-mix(in srgb, #10b981 80%, var(--foreground));
+}
+
+.theme-alert-error {
+  background: color-mix(in srgb, #ef4444 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, #ef4444 35%, var(--border));
+  color: color-mix(in srgb, #ef4444 85%, var(--foreground));
+}
+
+/* ── Scroll reveal (replays on scroll in/out) ── */
+.scroll-reveal {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.scroll-reveal-up {
+  transform: translateY(28px);
+}
+
+.scroll-reveal-scale {
+  transform: scale(0.96);
+}
+
+.scroll-reveal-fade {
+  transform: none;
+}
+
+.scroll-reveal-left {
+  transform: translateX(24px);
+}
+
+.scroll-reveal-right {
+  transform: translateX(-24px);
+}
+
+.scroll-reveal-up.is-visible {
+  animation: scroll-reveal-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.scroll-reveal-scale.is-visible {
+  animation: scroll-reveal-scale 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.scroll-reveal-fade.is-visible {
+  animation: scroll-reveal-fade 0.5s ease-out forwards;
+}
+
+.scroll-reveal-left.is-visible {
+  animation: scroll-reveal-left 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.scroll-reveal-right.is-visible {
+  animation: scroll-reveal-right 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes scroll-reveal-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scroll-reveal-scale {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes scroll-reveal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scroll-reveal-left {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scroll-reveal-right {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes flame {
+  0%, 100% { transform: scale(1) rotate(-2deg); opacity: 1; }
+  50% { transform: scale(1.08) rotate(2deg); opacity: 0.85; }
+}
+
+.animate-flame {
+  animation: flame 1.8s ease-in-out infinite;
+}
+
+@layer utilities {
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes badge-pop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.92); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.55s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.45s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.4s ease-out forwards;
+}
+
+.animate-badge-pop {
+  animation: badge-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 6s ease-in-out 2s infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.hover-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px -10px color-mix(in srgb, var(--primary) 40%, transparent);
 }
