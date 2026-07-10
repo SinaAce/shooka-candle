@@ -41,6 +41,17 @@ npm run setup
 npm run dev
 ```
 
+### انتشار با GitHub Desktop (Private)
+
+1. **GitHub Desktop** → File → **Add local repository**
+2. مسیر: `C:\Users\ASUS\Projects\shooka-candle`
+3. **Publish repository** → تیک **Keep this code private**
+4. نام پیشنهادی: `shooka-candle` → **Publish**
+
+بعد از publish، در Vercel ریپو را Connect کن (مرحله ۳ پایین).
+
+---
+
 سایت: [http://localhost:3000](http://localhost:3000)
 
 ### ورود ادمین (بعد از seed)
