@@ -1,20 +1,10 @@
-import path from "node:path";
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
-
-function getDatabasePath() {
-  const url = process.env.DATABASE_URL ?? "file:./prisma/dev.db";
-  if (url.startsWith("file:")) {
-    const filePath = url.replace("file:", "");
-    if (!path.isAbsolute(filePath)) {
-      return `file:${path.join(process.cwd(), filePath)}`;
-    }
-  }
-  return url;
-}
+import { getLibSqlConfig } from "./db-config";
 
 function createPrismaClient() {
-  const adapter = new PrismaLibSql({ url: getDatabasePath() });
+  const config = getLibSqlConfig();
+  const adapter = new PrismaLibSql(config);
   return new PrismaClient({ adapter });
 }
 

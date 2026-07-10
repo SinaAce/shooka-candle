@@ -1,21 +1,10 @@
-import path from "node:path";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
 import bcrypt from "bcryptjs";
 import "dotenv/config";
+import { getLibSqlConfig } from "../src/lib/db-config";
 
-function getDatabasePath() {
-  const url = process.env.DATABASE_URL ?? "file:./prisma/dev.db";
-  if (url.startsWith("file:")) {
-    const filePath = url.replace("file:", "");
-    if (!path.isAbsolute(filePath)) {
-      return `file:${path.join(process.cwd(), filePath)}`;
-    }
-  }
-  return url;
-}
-
-const adapter = new PrismaLibSql({ url: getDatabasePath() });
+const adapter = new PrismaLibSql(getLibSqlConfig());
 const prisma = new PrismaClient({ adapter });
 
 const productImages: Record<string, string> = {
