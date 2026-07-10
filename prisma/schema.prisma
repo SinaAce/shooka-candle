@@ -34,6 +34,11 @@ enum ReceiptStatus {
   REJECTED
 }
 
+enum GalleryType {
+  HERO
+  PAGE
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -42,6 +47,7 @@ model User {
   password      String?
   phone         String?
   role          Role      @default(USER)
+  banned        Boolean   @default(false)
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -136,6 +142,26 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model BannedPhone {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model GalleryImage {
+  id        String      @id @default(cuid())
+  url       String
+  alt       String?
+  type      GalleryType @default(HERO)
+  order     Int         @default(0)
+  active    Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([type, active, order])
 }
 
 model Category {

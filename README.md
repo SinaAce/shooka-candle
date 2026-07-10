@@ -63,20 +63,57 @@ npm run dev
 
 ---
 
-## ☁️ Deploy روی Vercel
+## ☁️ Deploy روی Vercel (قدم‌به‌قدم)
 
-1. ریپو را به GitHub وصل کنید
-2. در [Vercel](https://vercel.com) پروژه را Import کنید
-3. **Database:** [Turso](https://turso.tech) بسازید و `DATABASE_URL` را ست کنید
-4. Env vars را از `.env.example` کپی کنید
-5. بعد از deploy اول:
+### آیا Neon لازم است؟
 
-```bash
+**خیر.** این پروژه با **SQLite / LibSQL** کار می‌کند، نه PostgreSQL.
+
+| سرویس | مناسب این پروژه؟ |
+|--------|------------------|
+| **Turso** | ✅ بله — پیشنهادی |
+| Neon | ❌ خیر — PostgreSQL است |
+| Supabase Postgres | ❌ نیاز به تغییر schema |
+
+برای Vercel از **[Turso](https://turso.tech)** استفاده کنید (رایگان، سازگار با Prisma LibSQL adapter).
+
+---
+
+### مرحله ۱ — GitHub (Private)
+
+```powershell
+gh auth login
+gh repo create shooka-candle --private --source=. --remote=origin --push --description "فروشگاه شمع شوکا"
+```
+
+---
+
+### مرحله ۲ — Turso (دیتابیس production)
+
+1. [turso.tech](https://turso.tech) → Create Database
+2. `DATABASE_URL` = `libsql://YOUR-DB.turso.io?authToken=YOUR_TOKEN`
+
+---
+
+### مرحله ۳ — Vercel
+
+1. [vercel.com](https://vercel.com) → Import ریپو
+2. Env vars: `DATABASE_URL`, `AUTH_SECRET`, `NEXTAUTH_URL`, SMTP (اختیاری), AWS S3 (توصیه‌شده)
+3. Deploy
+
+---
+
+### مرحله ۴ — Schema و Seed (یک‌بار)
+
+```powershell
+# DATABASE_URL تورسو در .env
 npx prisma db push
 npx tsx prisma/seed.ts
 ```
 
-> برای آپلود تصاویر در production، AWS S3 را پیکربندی کنید.
+ادمین: `admin@shooka-candle.ir` / `admin123`
+
+> آپلود تصویر در production بدون S3 ذخیره نمی‌ماند.
 
 ---
 

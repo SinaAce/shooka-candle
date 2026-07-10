@@ -5,6 +5,8 @@ import Input from "@/components/ui/Input";
 import Textarea from "@/components/ui/Textarea";
 import Button from "@/components/ui/Button";
 import { Pencil, Trash2, X, Check } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
+import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 
 interface Category {
   id: string;
@@ -21,6 +23,13 @@ export default function AdminCategoriesPage() {
   const [form, setForm] = useState({ name: "", description: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.max(1, Math.ceil(categories.length / DEFAULT_PAGE_SIZE));
+  const pagedCategories = categories.slice(
+    (page - 1) * DEFAULT_PAGE_SIZE,
+    page * DEFAULT_PAGE_SIZE
+  );
 
   useEffect(() => {
     fetchCategories();
@@ -154,7 +163,7 @@ export default function AdminCategoriesPage() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {categories.map((cat, i) => (
+        {pagedCategories.map((cat, i) => (
           <div
             key={cat.id}
             className="bg-white rounded-xl border border-stone-200 p-4 hover:shadow-md transition-all animate-fade-in-up"
@@ -192,6 +201,13 @@ export default function AdminCategoriesPage() {
           </div>
         ))}
       </div>
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={categories.length}
+        onPageChange={setPage}
+      />
     </div>
   );
 }

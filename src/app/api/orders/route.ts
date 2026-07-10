@@ -1,28 +1,41 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { checkoutSchema } from "@/lib/validations";
 import { generateOrderNumber, paymentMethodFromCheckout } from "@/lib/utils";
 import { getSiteSettings, calculateOrderTotals } from "@/lib/settings";
 import { notifyAllAdmins, createNotification } from "@/lib/notifications";
+import { parsePagination, paginationMeta } from "@/lib/pagination";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "لطفاً وارد شوید" }, { status: 401 });
     }
 
-    const orders = await prisma.order.findMany({
-      where: { userId: session.user.id },
-      include: {
-        items: true,
-        address: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    const { page, limit, skip } = parsePagination(request.nextUrl.searchParams);
 
-    return NextResponse.json(orders);
+    const where = { userId: session.user.id };
+
+    const [orders, total] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        include: {
+          items: true,
+          address: true,
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.order.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      orders,
+      pagination: paginationMeta(total, page, limit),
+    });
   } catch {
     return NextResponse.json(
       { error: "خطا در دریافت سفارشات" },

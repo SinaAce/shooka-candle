@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { buildProductSearchWhere } from "@/lib/search";
+import { parsePagination } from "@/lib/pagination";
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,9 +9,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get("category");
     const featured = searchParams.get("featured");
     const search = searchParams.get("search");
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "12");
-    const skip = (page - 1) * limit;
+    const { page, limit, skip } = parsePagination(searchParams);
 
     const where: Record<string, unknown> = { active: true };
 
@@ -19,13 +19,8 @@ export async function GET(request: NextRequest) {
     if (featured === "true") {
       where.featured = true;
     }
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-        { scent: { contains: search, mode: "insensitive" } },
-      ];
-    }
+    const searchWhere = buildProductSearchWhere(search);
+    if (searchWhere) Object.assign(where, searchWhere);
 
     const [products, total] = await Promise.all([
       prisma.product.findMany({

@@ -12,6 +12,7 @@ import {
   Megaphone,
   PlusCircle,
   BarChart3,
+  Images,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,7 @@ const links = [
   { href: "/admin/products/new", label: "افزودن شمع", icon: PlusCircle },
   { href: "/admin/orders", label: "سفارشات", icon: ShoppingCart },
   { href: "/admin/categories", label: "دسته‌بندی‌ها", icon: FolderOpen },
+  { href: "/admin/gallery", label: "گالری", icon: Images },
   { href: "/admin/users", label: "کاربران", icon: Users },
   { href: "/admin/announcements", label: "اطلاعیه‌ها", icon: Megaphone },
   { href: "/admin/settings", label: "تنظیمات سایت", icon: Settings },

@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import AccountSidebar from "@/components/account/AccountSidebar";
+import Pagination from "@/components/ui/Pagination";
 import { formatPrice, ORDER_STATUS_LABELS } from "@/lib/utils";
+import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 import { Package } from "lucide-react";
 
 interface Order {
@@ -18,15 +20,21 @@ interface Order {
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    fetch("/api/orders")
+    setLoading(true);
+    fetch(`/api/orders?page=${page}&limit=${DEFAULT_PAGE_SIZE}`)
       .then((r) => r.json())
       .then((data) => {
-        setOrders(Array.isArray(data) ? data : []);
+        setOrders(data.orders || (Array.isArray(data) ? data : []));
+        setTotalPages(data.pagination?.totalPages || 1);
+        setTotal(data.pagination?.total || 0);
         setLoading(false);
       });
-  }, []);
+  }, [page]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
@@ -77,6 +85,13 @@ export default function OrdersPage() {
               ))}
             </div>
           )}
+
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            onPageChange={setPage}
+          />
         </div>
       </div>
     </div>

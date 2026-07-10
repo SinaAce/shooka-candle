@@ -38,10 +38,23 @@ async function getCategories() {
   }
 }
 
+async function getPageGallery() {
+  try {
+    return await prisma.galleryImage.findMany({
+      where: { active: true, type: "PAGE" },
+      orderBy: { order: "asc" },
+      select: { url: true, alt: true },
+    });
+  } catch {
+    return [];
+  }
+}
+
 export default async function HomePage() {
-  const [featuredProducts, categories] = await Promise.all([
+  const [featuredProducts, categories, pageGallery] = await Promise.all([
     getFeaturedProducts(),
     getCategories(),
+    getPageGallery(),
   ]);
 
   return (
@@ -119,23 +132,29 @@ export default async function HomePage() {
           <h2 className="scroll-reveal scroll-reveal-up text-xl sm:text-2xl font-bold text-[var(--foreground)] mb-6 sm:mb-8">
             گالری شوکا
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-            {[2, 3, 4, 11, 12, 13, 14, 15].map((n, i) => (
-              <div
-                key={n}
-                className="scroll-reveal scroll-reveal-up relative aspect-square rounded-2xl overflow-hidden ring-1 ring-[var(--border)] hover-lift candle-glow"
-                style={{ animationDelay: `${i * 70}ms` }}
-              >
-                <Image
-                  src={`/images/gallery/candle-${n}.${n <= 4 ? "png" : "jpg"}`}
-                  alt={`شمع دست‌ساز شوکا ${n}`}
-                  fill
-                  className="object-cover hover:scale-105 transition-transform duration-500"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                />
-              </div>
-            ))}
-          </div>
+          {pageGallery.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+              {pageGallery.map((img, i) => (
+                <div
+                  key={img.url + i}
+                  className="scroll-reveal scroll-reveal-up relative aspect-square rounded-2xl overflow-hidden ring-1 ring-[var(--border)] hover-lift candle-glow"
+                  style={{ animationDelay: `${i * 70}ms` }}
+                >
+                  <Image
+                    src={img.url}
+                    alt={img.alt || `شمع دست‌ساز شوکا ${i + 1}`}
+                    fill
+                    className="object-cover hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-[var(--text-muted)] py-8">
+              به زودی تصاویر گالری اضافه می‌شوند
+            </p>
+          )}
         </div>
       </section>
 

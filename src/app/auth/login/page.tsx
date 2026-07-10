@@ -76,6 +76,15 @@ export default function LoginPage() {
             ورود
           </Button>
 
+          <p className="text-center text-sm">
+            <Link
+              href="/auth/forgot-password"
+              className="text-[var(--primary)] hover:underline"
+            >
+              فراموشی رمز عبور
+            </Link>
+          </p>
+
           <p className="text-center text-sm text-stone-500">
             حساب کاربری ندارید؟{" "}
             <Link href="/auth/register" className="text-amber-700 hover:underline">

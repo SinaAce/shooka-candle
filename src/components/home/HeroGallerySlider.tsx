@@ -7,22 +7,37 @@ import { GALLERY_SLIDES } from "@/lib/constants";
 const INTERVAL_MS = 3000;
 
 export default function HeroGallerySlider() {
+  const [slides, setSlides] = useState<string[]>([...GALLERY_SLIDES]);
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
+    fetch("/api/gallery?type=hero")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setSlides(data.map((img: { url: string }) => img.url));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (slides.length === 0) return;
     const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % GALLERY_SLIDES.length);
+      setIndex((prev) => (prev + 1) % slides.length);
     }, INTERVAL_MS);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
+
+  if (slides.length === 0) return null;
 
   return (
     <div className="relative w-full max-w-xs sm:max-w-sm mx-auto lg:mx-0 lg:mr-auto">
       <div className="absolute -inset-3 bg-gradient-to-br from-[var(--glow)]/25 to-transparent rounded-2xl blur-xl pointer-events-none" />
       <div className="relative aspect-[5/4] max-h-[min(38vh,280px)] rounded-2xl overflow-hidden shadow-xl ring-1 ring-[var(--border)] candle-glow bg-[var(--surface-alt)]">
-        {GALLERY_SLIDES.map((src, i) => (
+        {slides.map((src, i) => (
           <div
-            key={src}
+            key={`${src}-${i}`}
             className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
               i === index ? "opacity-100 z-10" : "opacity-0 z-0"
             }`}
@@ -39,7 +54,7 @@ export default function HeroGallerySlider() {
         ))}
 
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
-          {GALLERY_SLIDES.map((_, i) => (
+          {slides.map((_, i) => (
             <button
               key={i}
               type="button"

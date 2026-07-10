@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations";
+import { isPhoneBanned } from "@/lib/banned";
 
 export async function POST(request: Request) {
   try {
@@ -16,6 +17,13 @@ export async function POST(request: Request) {
     }
 
     const { name, email, password, phone } = parsed.data;
+
+    if (phone && (await isPhoneBanned(phone))) {
+      return NextResponse.json(
+        { error: "ثبت‌نام با این شماره امکان‌پذیر نیست" },
+        { status: 403 }
+      );
+    }
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {

@@ -1,7 +1,10 @@
 import { Suspense } from "react";
 import ProductCard from "@/components/products/ProductCard";
 import ProductFilters from "@/components/products/ProductFilters";
+import { ServerPagination } from "@/components/ui/Pagination";
 import prisma from "@/lib/prisma";
+import { buildProductSearchWhere } from "@/lib/search";
+import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from "@/lib/pagination";
 
 interface ProductsPageProps {
   searchParams: Promise<{
@@ -13,6 +16,7 @@ interface ProductsPageProps {
     scent?: string;
     featured?: string;
     page?: string;
+    limit?: string;
   }>;
 }
 
@@ -45,7 +49,10 @@ function getOrderBy(sort?: string) {
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = await searchParams;
   const page = parseInt(params.page || "1");
-  const limit = 12;
+  const rawLimit = parseInt(params.limit || String(DEFAULT_PAGE_SIZE), 10);
+  const limit = PAGE_SIZE_OPTIONS.includes(rawLimit as (typeof PAGE_SIZE_OPTIONS)[number])
+    ? rawLimit
+    : DEFAULT_PAGE_SIZE;
   const skip = (page - 1) * limit;
 
   const where: Record<string, unknown> = { active: true };
@@ -53,15 +60,12 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   if (params.category) {
     where.category = { slug: params.category };
   }
-  if (params.search) {
-    where.OR = [
-      { name: { contains: params.search, mode: "insensitive" } },
-      { scent: { contains: params.search, mode: "insensitive" } },
-      { description: { contains: params.search, mode: "insensitive" } },
-    ];
+  const searchWhere = buildProductSearchWhere(params.search);
+  if (searchWhere) {
+    Object.assign(where, searchWhere);
   }
   if (params.scent) {
-    where.scent = { contains: params.scent, mode: "insensitive" };
+    where.scent = { contains: params.scent };
   }
   if (params.featured === "true") {
     where.featured = true;
@@ -150,23 +154,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               </div>
 
               {totalPages > 1 && (
-                <div className="flex justify-center gap-1.5 sm:gap-2 mt-8 flex-wrap">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (p) => (
-                      <a
-                        key={p}
-                        href={`/products${buildQueryString(params, p)}`}
-                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center text-sm ${
-                          p === page
-                            ? "bg-[var(--primary)] text-white"
-                            : "bg-[var(--surface)] border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]"
-                        }`}
-                      >
-                        {p}
-                      </a>
-                    )
-                  )}
-                </div>
+                <ServerPagination
+                  page={page}
+                  totalPages={totalPages}
+                  total={total}
+                  buildHref={(p) =>
+                    `/products${buildQueryString({ ...params, limit: String(limit) }, p)}`
+                  }
+                />
               )}
             </>
           ) : (

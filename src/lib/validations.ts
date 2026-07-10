@@ -87,3 +87,13 @@ export const announcementSchema = z.object({
   message: z.string().trim().min(5, "متن اطلاعیه الزامی است"),
   link: z.string().optional().nullable(),
 });
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("ایمیل معتبر وارد کنید"),
+});
+
+export const resetPasswordSchema = z.object({
+  email: z.string().email("ایمیل معتبر وارد کنید"),
+  token: z.string().min(1, "توکن نامعتبر است"),
+  password: z.string().min(6, "رمز عبور باید حداقل ۶ کاراکتر باشد"),
+});

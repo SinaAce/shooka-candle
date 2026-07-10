@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import prisma from "./prisma";
 import { loginSchema } from "./validations";
 import { authConfig } from "./auth.config";
+import { isPhoneBanned } from "./banned";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -24,6 +25,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
 
         if (!user || !user.password) return null;
+
+        if (user.banned) return null;
+
+        if (user.phone && (await isPhoneBanned(user.phone))) return null;
 
         const isValid = await bcrypt.compare(
           parsed.data.password,

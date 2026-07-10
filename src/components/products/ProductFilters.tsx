@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import { PAGE_SIZE_OPTIONS } from "@/lib/pagination";
 
 interface ProductFiltersProps {
   categories: { id: string; name: string; slug: string }[];
@@ -18,6 +19,7 @@ interface ProductFiltersProps {
     scent?: string;
     featured?: string;
     page?: string;
+    limit?: string;
   };
 }
 
@@ -72,7 +74,7 @@ export default function ProductFilters({
     <div className="space-y-5">
       <form onSubmit={handleSearch} className="relative">
         <Input
-          placeholder="جستجو در محصولات..."
+          placeholder="جستجو با هر کلمه..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-10"
@@ -117,6 +119,25 @@ export default function ProductFilters({
             </li>
           ))}
         </ul>
+      </div>
+
+      <div>
+        <h3 className="font-semibold text-[var(--foreground)] mb-3 text-sm">
+          تعداد در صفحه
+        </h3>
+        <select
+          value={currentParams.limit || "10"}
+          onChange={(e) =>
+            router.push(buildUrl({ limit: e.target.value === "10" ? undefined : e.target.value }))
+          }
+          className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-sm text-[var(--foreground)]"
+        >
+          {PAGE_SIZE_OPTIONS.map((n) => (
+            <option key={n} value={n}>
+              {n.toLocaleString("fa-IR")} محصول
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>

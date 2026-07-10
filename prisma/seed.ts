@@ -213,6 +213,59 @@ async function main() {
     }
   }
 
+  const galleryUrls = {
+    HERO: [
+      "/images/gallery/candle-1.jpg",
+      "/images/gallery/candle-2.png",
+      "/images/gallery/candle-3.png",
+      "/images/gallery/candle-4.png",
+      "/images/gallery/candle-11.jpg",
+      "/images/gallery/candle-12.jpg",
+      "/images/gallery/candle-13.jpg",
+      "/images/gallery/candle-14.jpg",
+      "/images/gallery/candle-15.jpg",
+      "/images/gallery/candle-16.jpg",
+    ],
+    PAGE: [
+      "/images/gallery/candle-2.png",
+      "/images/gallery/candle-3.png",
+      "/images/gallery/candle-4.png",
+      "/images/gallery/candle-5.jpg",
+      "/images/gallery/candle-6.jpg",
+      "/images/gallery/candle-7.jpg",
+      "/images/gallery/candle-8.jpg",
+      "/images/gallery/candle-11.jpg",
+      "/images/gallery/candle-12.jpg",
+      "/images/gallery/candle-13.jpg",
+      "/images/gallery/candle-14.jpg",
+      "/images/gallery/candle-15.jpg",
+      "/images/gallery/candle-17.jpg",
+      "/images/gallery/candle-18.jpg",
+      "/images/gallery/candle-19.jpg",
+      "/images/gallery/candle-20.jpg",
+    ],
+  } as const;
+
+  for (const [type, urls] of Object.entries(galleryUrls) as [
+    "HERO" | "PAGE",
+    readonly string[],
+  ][]) {
+    const count = await prisma.galleryImage.count({ where: { type } });
+    if (count === 0) {
+      for (let i = 0; i < urls.length; i++) {
+        await prisma.galleryImage.create({
+          data: {
+            url: urls[i],
+            alt: type === "HERO" ? `اسلاید ${i + 1}` : `گالری ${i + 1}`,
+            order: i,
+            type,
+          },
+        });
+      }
+      console.log(`✅ Gallery ${type} seeded (${urls.length} images)`);
+    }
+  }
+
   console.log("\n🎉 Seed completed!");
 }
 

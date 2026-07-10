@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import {
@@ -10,6 +10,9 @@ import {
   RECEIPT_STATUS_LABELS,
 } from "@/lib/utils";
 import Button from "@/components/ui/Button";
+import AdminSearchBar from "@/components/admin/AdminSearchBar";
+import Pagination from "@/components/ui/Pagination";
+import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 import {
   CheckCircle,
   XCircle,
@@ -368,12 +371,39 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [pendingReceipts, setPendingReceipts] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    const qs = new URLSearchParams({
+      page: String(page),
+      limit: String(DEFAULT_PAGE_SIZE),
+    });
+    if (search) qs.set("search", search);
+
+    const res = await fetch(`/api/admin/orders?${qs}`);
+    const data = await res.json();
+    setOrders(data.orders || []);
+    setPendingReceipts(data.pendingReceipts || 0);
+    setTotalPages(data.pagination?.totalPages || 1);
+    setTotal(data.pagination?.total || 0);
+    setLoading(false);
+  }, [page, search]);
 
   useEffect(() => {
-    fetch("/api/admin/orders")
-      .then((r) => r.json())
-      .then(setOrders);
-  }, []);
+    fetchOrders();
+  }, [fetchOrders]);
+
+  function handleSearch() {
+    setPage(1);
+    setSearch(searchInput.trim());
+  }
 
   function updateOrderInList(updated: Order) {
     setOrders((prev) =>
@@ -413,20 +443,25 @@ export default function AdminOrdersPage() {
     setActionLoading(null);
   }
 
-  const pendingReceipts = orders.filter(
-    (o) => o.receiptStatus === "PENDING_REVIEW"
-  );
 
   return (
     <div className="space-y-6">
-      <h1 className="scroll-reveal scroll-reveal-up text-2xl font-bold text-[var(--foreground)]">
-        مدیریت سفارشات
-      </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 className="scroll-reveal scroll-reveal-up text-2xl font-bold text-[var(--foreground)]">
+          مدیریت سفارشات
+        </h1>
+        <AdminSearchBar
+          value={searchInput}
+          onChange={setSearchInput}
+          onSubmit={handleSearch}
+          placeholder="جستجو: شماره سفارش، نام، تلفن، آدرس..."
+        />
+      </div>
 
-      {pendingReceipts.length > 0 && (
+      {pendingReceipts > 0 && (
         <div className="scroll-reveal scroll-reveal-up bg-amber-50 border border-amber-200 rounded-xl p-4 candle-glow">
           <p className="text-sm font-medium text-amber-800">
-            {pendingReceipts.length} رسید در انتظار بررسی
+            {pendingReceipts.toLocaleString("fa-IR")} رسید در انتظار بررسی
           </p>
         </div>
       )}
@@ -446,7 +481,20 @@ export default function AdminOrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-[var(--text-muted)]">
+                    در حال بارگذاری...
+                  </td>
+                </tr>
+              ) : orders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-stone-400">
+                    سفارشی یافت نشد
+                  </td>
+                </tr>
+              ) : (
+                orders.map((order) => (
                 <tr
                   key={order.id}
                   className="border-b border-stone-50 hover:bg-[var(--surface-alt)]/50 transition-colors"
@@ -455,6 +503,9 @@ export default function AdminOrdersPage() {
                   <td className="p-4">
                     <p>{order.user.name || "—"}</p>
                     <p className="text-xs text-stone-400">{order.user.email}</p>
+                    {order.user.phone && (
+                      <p className="text-xs text-stone-400" dir="ltr">{order.user.phone}</p>
+                    )}
                   </td>
                   <td className="p-4">
                     <p className="text-xs">
@@ -488,18 +539,19 @@ export default function AdminOrdersPage() {
                     </Button>
                   </td>
                 </tr>
-              ))}
-              {orders.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="p-8 text-center text-stone-400">
-                    سفارشی ثبت نشده
-                  </td>
-                </tr>
+                ))
               )}
             </tbody>
           </table>
         </div>
       </div>
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPageChange={setPage}
+      />
 
       {selectedOrder && (
         <OrderDetailModal
