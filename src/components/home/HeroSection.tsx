@@ -15,8 +15,8 @@ export default function HeroSection() {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center">
-          <div className="scroll-reveal scroll-reveal-up order-2 lg:order-1">
-            <div className="inline-flex items-center gap-2 bg-[var(--primary-light)] text-[var(--primary)] px-4 py-1.5 rounded-full text-sm mb-4 candle-glow">
+          <div className="scroll-reveal scroll-reveal-up order-2 lg:order-1 text-center lg:text-right">
+            <div className="inline-flex items-center gap-2 bg-[var(--primary-light)] text-[var(--primary)] px-4 py-1.5 rounded-full text-sm mb-4 candle-glow mx-auto lg:mx-0">
               <span className="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse-soft" />
               شمع‌های دست‌ساز با کیفیت
             </div>
@@ -27,12 +27,12 @@ export default function HeroSection() {
               شما
             </h1>
 
-            <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed mb-6 max-w-xl">
+            <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed mb-6 max-w-xl mx-auto lg:mx-0">
               مجموعه‌ای از شمع‌های دست‌ساز و تزئینی با رایحه‌های منحصربه‌فرد.
               هر شمع با عشق و دقت ساخته شده تا لحظات شما را خاص‌تر کند.
             </p>
 
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 justify-center lg:justify-start">
               <Link href="/products">
                 <Button size="lg" className="w-full sm:w-auto hover-lift">
                   مشاهده محصولات
