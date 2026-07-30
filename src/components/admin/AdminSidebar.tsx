@@ -13,12 +13,13 @@ import {
   PlusCircle,
   BarChart3,
   Images,
+  X,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { LOGO_PATH, BRAND_NAME } from "@/lib/constants";
 
-const links = [
+export const adminLinks = [
   { href: "/admin", label: "داشبورد", icon: LayoutDashboard },
   { href: "/admin/analytics", label: "آنالیز درآمد", icon: BarChart3 },
   { href: "/admin/products", label: "محصولات", icon: Package },
@@ -31,12 +32,24 @@ const links = [
   { href: "/admin/settings", label: "تنظیمات سایت", icon: Settings },
 ];
 
-export default function AdminSidebar() {
+interface AdminSidebarProps {
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+}
+
+export default function AdminSidebar({
+  mobileOpen = false,
+  onMobileClose,
+}: AdminSidebarProps) {
   const pathname = usePathname();
 
-  return (
-    <aside className="w-64 bg-[var(--surface)] text-[var(--text-secondary)] min-h-full p-4 flex flex-col border-l border-[var(--border)] shrink-0 shadow-sm">
-      <Link href="/admin" className="flex items-center gap-2.5 mb-8 px-2 group">
+  const nav = (
+    <>
+      <Link
+        href="/admin"
+        className="flex items-center gap-2.5 mb-6 px-2 group"
+        onClick={onMobileClose}
+      >
         <Image
           src={LOGO_PATH}
           alt={BRAND_NAME}
@@ -50,8 +63,8 @@ export default function AdminSidebar() {
         </div>
       </Link>
 
-      <nav className="flex-1 space-y-0.5">
-        {links.map((link) => {
+      <nav className="flex-1 space-y-0.5 overflow-y-auto">
+        {adminLinks.map((link) => {
           const isActive =
             link.href === "/admin"
               ? pathname === "/admin"
@@ -63,6 +76,7 @@ export default function AdminSidebar() {
             <Link
               key={link.href}
               href={link.href}
+              onClick={onMobileClose}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all",
                 isActive
@@ -80,6 +94,47 @@ export default function AdminSidebar() {
       <div className="mt-4 pt-4 border-t border-[var(--border)] text-[10px] text-[var(--text-muted)] px-2">
         نسخه ۲.۰ — مدیریت کامل فروشگاه
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex w-64 bg-[var(--surface)] text-[var(--text-secondary)] min-h-full p-4 flex-col border-l border-[var(--border)] shrink-0 shadow-sm">
+        {nav}
+      </aside>
+
+      {/* Mobile drawer overlay */}
+      {mobileOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-[60] bg-black/50"
+          onClick={onMobileClose}
+          aria-hidden
+        />
+      )}
+
+      {/* Mobile drawer */}
+      <aside
+        className={cn(
+          "lg:hidden fixed top-0 right-0 bottom-0 z-[70] w-[min(85vw,18rem)] bg-[var(--surface)] p-4 flex flex-col border-l border-[var(--border)] shadow-xl transition-transform duration-300",
+          mobileOpen ? "translate-x-0" : "translate-x-full pointer-events-none"
+        )}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-semibold text-[var(--foreground)]">
+            منوی مدیریت
+          </span>
+          <button
+            type="button"
+            onClick={onMobileClose}
+            className="p-2 rounded-lg text-[var(--text-muted)] hover:bg-[var(--surface-hover)]"
+            aria-label="بستن منو"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        {nav}
+      </aside>
+    </>
   );
 }

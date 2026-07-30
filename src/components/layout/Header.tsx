@@ -179,6 +179,22 @@ export default function Header() {
                 >
                   حساب کاربری
                 </Link>
+                {session.user.role === "ADMIN" && (
+                  <Link
+                    href="/admin"
+                    className="block py-2.5 text-[var(--primary)] font-medium"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    پنل مدیریت
+                  </Link>
+                )}
+                <Link
+                  href="/account/orders"
+                  className="block py-2.5 text-[var(--text-secondary)]"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  سفارشات
+                </Link>
                 <button
                   onClick={() => signOut()}
                   className="block py-2.5 text-red-600 w-full text-right"
